@@ -41,10 +41,10 @@ cd navy-autonomous
    # Add ROS tap
    brew tap ros/melodic
    brew tap osrf/simulation
-   
+
    # Install ROS Noetic
    brew install ros-noetic-desktop-full
-   
+
    # Install additional ROS packages
    brew install ros-noetic-turtlebot3-msgs
    brew install ros-noetic-navigation
@@ -59,7 +59,7 @@ cd navy-autonomous
    brew install eigen
    brew install cmake
    brew install pkg-config
-   
+
    # Python dependencies
    pip3 install opencv-python numpy scipy matplotlib
    ```
@@ -297,4 +297,4 @@ See individual package repositories for licensing information.
 
 ## Original Documentation
 
-For detailed setup instructions and technical details, see the original documentation in `catkin_ws/src/turtlebot-documentation/README.md`. 
+For detailed setup instructions and technical details, see the original documentation in `catkin_ws/src/turtlebot-documentation/README.md`.
