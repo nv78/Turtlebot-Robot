@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  navy-autonomous:
+    build:
+      context: ../..
+      dockerfile: deployment/production/Dockerfile
+      target: production
+    image: navy-autonomous:${NAVY_IMAGE_VERSION:-latest}
+    container_name: navy-autonomous-dev
+    hostname: navy-autonomous-dev
+    restart: unless-stopped
+    environment:
+      - NAVY_MODE=${NAVY_MODE:-test_yolo}
+      - ROS_MASTER_URI=http://localhost:11311
+      - ROS_IP=172.20.0.10
+      - TURTLEBOT3_MODEL=waffle_pi
+      - ENABLE_HEALTH_MONITORING=true
+      - LOG_LEVEL=DEBUG
+    ports:
+      - "11311:11311"
+      - "11312:11312"
+    volumes:
+      - "../../catkin_ws:/catkin_ws:rw"
+      - "navy_logs:/var/log/navy-autonomous"
+      - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+    networks:
+      navy_network:
+        ipv4_address: 172.20.0.10
+    healthcheck:
+      test: ["/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    stdin_open: true
+    tty: true
+
+  # Optional: Separate ROS Master for testing
+  roscore:
+    image: ros:noetic-ros-base
+    container_name: navy-roscore-dev
+    hostname: navy-roscore-dev
+    restart: unless-stopped
+    command: roscore
+    ports:
+      - "11313:11311"
+    networks:
+      navy_network:
+        ipv4_address: 172.20.0.11
+    healthcheck:
+      test: ["CMD", "rostopic", "list"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Development tools container
+  dev-tools:
+    image: ros:noetic-desktop-full
+    container_name: navy-dev-tools
+    hostname: navy-dev-tools
+    restart: unless-stopped
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - "../../catkin_ws:/catkin_ws:rw"
+      - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+      - "dev_tools_home:/home/developer"
+    networks:
+      navy_network:
+        ipv4_address: 172.20.0.12
+    working_dir: /catkin_ws
+    command: tail -f /dev/null
+    stdin_open: true
+    tty: true
+
+networks:
+  navy_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  navy_logs:
+    driver: local
+  dev_tools_home:
+    driver: local 

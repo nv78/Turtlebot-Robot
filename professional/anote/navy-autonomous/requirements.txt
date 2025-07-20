@@ -1,0 +1,51 @@
+# Navy Autonomous Robot - Python Dependencies
+# Production requirements for autonomous TurtleBot3 system
+# Compatible with ROS Noetic and Ubuntu 20.04 LTS
+
+# Core scientific computing libraries
+numpy>=1.19.0
+scipy>=1.7.0
+matplotlib>=3.3.0
+
+# Computer Vision and Image Processing
+opencv-python==4.8.1.78
+Pillow>=8.0.0
+
+# ROS Python packages and utilities
+catkin_pkg>=0.4.0
+rospkg>=1.2.0
+rospy>=1.14.0
+rosbag>=1.14.0
+tf2_ros>=0.7.0
+tf2_geometry_msgs>=0.7.0
+geometry_msgs>=1.13.0
+sensor_msgs>=1.13.0
+std_msgs>=0.5.0
+
+# Motion planning and manipulation
+moveit_commander>=1.1.0
+
+# Machine Learning and Neural Networks
+torch>=1.13.0
+torchvision>=0.14.0
+
+# Object Detection Dependencies (YOLO)
+PyYAML>=5.4.0
+tqdm>=4.62.0
+
+# Additional Image Processing
+imageio>=2.9.0
+scikit-image>=0.18.0
+
+# ROS Build and Development Tools
+empy>=3.3.0
+defusedxml>=0.7.0
+netifaces>=0.10.0
+
+# System Utilities
+setuptools>=50.0.0
+wheel>=0.36.0
+
+# Development and Debugging Tools
+jupyter>=1.0.0
+ipywidgets>=7.6.0 

@@ -1,0 +1,64 @@
+# Navy Autonomous Robot - Docker Compose Configuration
+# Production-ready Docker environment for autonomous TurtleBot3 system
+# Provides containerized ROS environment with GUI support for macOS development
+
+version: '3.8'
+
+services:
+  # Primary robot control service
+  # Handles autonomous navigation, object detection, and manipulation
+  navy-robot:
+    build:
+      context: .
+      dockerfile: deployment/production/Dockerfile
+      target: production
+    image: navy-autonomous:dev
+    container_name: navy-robot
+    environment:
+      # Robot operation mode: test_yolo, basic, semi_autonomous, full_autonomous
+      - NAVY_MODE=${NAVY_MODE:-test_yolo}
+      # ROS networking configuration
+      - ROS_MASTER_URI=http://localhost:11311
+      - ROS_IP=172.20.0.10
+      # TurtleBot3 hardware configuration
+      - TURTLEBOT3_MODEL=waffle_pi
+      # GUI display configuration for macOS X11 forwarding
+      - DISPLAY=host.docker.internal:0
+      - QT_X11_NO_MITSHM=1
+    ports:
+      # ROS Master and communication ports
+      - "11311:11311"
+      - "11312:11312"
+    volumes:
+      # Mount source code for development
+      - "./catkin_ws:/catkin_ws:rw"
+      # X11 socket for GUI applications
+      - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+    # Ensure Linux AMD64 compatibility on Apple Silicon
+    platform: linux/amd64
+    stdin_open: true
+    tty: true
+
+  # RViz visualization service
+  # Provides 3D visualization of robot state, sensor data, and planning
+  rviz:
+    image: ros:noetic-desktop-full
+    container_name: navy-rviz
+    environment:
+      # Display configuration for GUI rendering
+      - DISPLAY=host.docker.internal:0
+      - QT_X11_NO_MITSHM=1
+      # Connect to robot's ROS master
+      - ROS_MASTER_URI=http://navy-robot:11311
+    volumes:
+      # Access to robot configuration and launch files
+      - "./catkin_ws:/catkin_ws:rw"
+      # X11 forwarding for macOS
+      - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+    # Ensure Linux AMD64 compatibility
+    platform: linux/amd64
+    # Launch RViz with object tracking configuration
+    command: bash -c "source /opt/ros/noetic/setup.bash && source /catkin_ws/devel/setup.bash && rviz -d /catkin_ws/src/object_tracking/rviz/object_tracking.rviz"
+    # Wait for robot service to be ready
+    depends_on:
+      - navy-robot 

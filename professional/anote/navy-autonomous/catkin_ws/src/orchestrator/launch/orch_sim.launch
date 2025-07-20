@@ -1,0 +1,42 @@
+<launch>
+
+  <!-- Arguments -->
+  <arg name="open_rviz" default="true"/>
+
+  <!-- Gazebo (run launch file) -->
+  <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_house_orch.launch"/>
+
+  <!-- SLAM (run launch file) -->
+  <include file="$(find turtlebot3_slam)/launch/turtlebot3_slam.launch">
+    <arg name="open_rviz" value="false"/>
+  </include>
+
+  <!-- Rviz (open rviz with navigation config) -->
+  <group if="$(arg open_rviz)"> 
+  <node pkg="rviz" type="rviz" name="rviz" required="true"
+      args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
+  </group>
+
+  <!-- Move Base (run launch file) -->
+  <include file="$(find turtlebot3_navigation)/launch/move_base.launch"/>
+
+  <!-- Explore Lite (run launch file) -->
+  <include file="$(find explore_lite)/launch/explore.launch">
+   <arg name="exploration_time_limit" value="35.0"/>
+  </include>
+
+  <!-- Orchestration (run python file) -->
+  <node pkg="orch_pkg" type="main.py" name="orch_pkg" output="screen"/>
+
+  <!-- Apriltag -->
+  <include file="$(find apriltag_ros)/launch/continuous_detection.launch"/>
+
+  <!-- Trashcan (run python file) -->
+  <node pkg="object_tracking" type="detect_trashcan.py" name="detect_trashcan" output="screen"/>
+  <node pkg="object_tracking" type="find_trashcan.py" name="find_trashcan" output="screen"/>
+
+  <!-- Darknet (run launch file) -->
+  <include file="$(find darknet_ros)/launch/darknet_ros.launch"/>
+  
+
+</launch>

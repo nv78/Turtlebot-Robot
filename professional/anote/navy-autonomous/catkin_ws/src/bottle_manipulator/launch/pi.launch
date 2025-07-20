@@ -1,0 +1,13 @@
+<launch>
+  <machine name="raspi" address="192.168.43.157" env-loader="/opt/ros/kinetic/env.sh" user="pi" default="true"/>
+
+  <!-- run moveit group, added by Eduardo-->
+  <include file="$(find turtlebot3_manipulation_bringup)/launch/turtlebot3_manipulation_bringup.launch"/>
+
+</launch>
+
+
+
+
+
+

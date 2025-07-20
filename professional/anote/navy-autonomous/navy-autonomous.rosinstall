@@ -1,0 +1,89 @@
+- git:
+    local-name: object_tracking
+    uri: https://github.com/Cornell-Tech-Turtlebot/object_tracking.git
+    version: master
+
+- git:
+    local-name: darknet_ros
+    uri: https://github.com/leggedrobotics/darknet_ros.git
+    version: master
+
+- git:
+    local-name: ar_track_alvar
+    uri: https://github.com/ros-perception/ar_track_alvar.git
+    version: noetic-devel
+
+- git:
+    local-name: bottle_manipulator
+    uri: https://github.com/Cornell-Tech-Turtlebot/bottle_manipulator.git
+    version: master
+
+- git:
+    local-name: patrol
+    uri: https://github.com/Cornell-Tech-Turtlebot/patrol.git
+    version: master
+
+- git:
+    local-name: orchestrator
+    uri: https://github.com/Cornell-Tech-Turtlebot/orchestrator.git
+    version: master
+
+- git:
+    local-name: moveit
+    uri: https://github.com/ros-planning/moveit.git
+    version: noetic-devel
+
+- git:
+    local-name: apriltag_ros
+    uri: https://github.com/AprilRobotics/apriltag_ros.git
+    version: master
+
+- git:
+    local-name: raspicam_node
+    uri: https://github.com/UbiquityRobotics/raspicam_node.git
+    version: noetic-devel
+
+- git:
+    local-name: turtlebot3
+    uri: https://github.com/ROBOTIS-GIT/turtlebot3.git
+    version: noetic-devel
+
+- git:
+    local-name: turtlebot3_msgs
+    uri: https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
+    version: noetic-devel
+
+- git:
+    local-name: turtlebot3_simulations
+    uri: https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
+    version: noetic-devel
+
+- git:
+    local-name: open_manipulator
+    uri: https://github.com/ROBOTIS-GIT/open_manipulator.git
+    version: noetic-devel
+
+- git:
+    local-name: open_manipulator_msgs
+    uri: https://github.com/ROBOTIS-GIT/open_manipulator_msgs.git
+    version: noetic-devel
+
+- git:
+    local-name: open_manipulator_simulations
+    uri: https://github.com/ROBOTIS-GIT/open_manipulator_simulations.git
+    version: noetic-devel
+
+- git:
+    local-name: turtlebot3_manipulation
+    uri: https://github.com/ROBOTIS-GIT/turtlebot3_manipulation.git
+    version: noetic-devel
+
+- git:
+    local-name: turtlebot3_manipulation_simulations
+    uri: https://github.com/ROBOTIS-GIT/turtlebot3_manipulation_simulations.git
+    version: noetic-devel
+
+- git:
+    local-name: DynamixelSDK
+    uri: https://github.com/ROBOTIS-GIT/DynamixelSDK.git
+    version: noetic-devel 

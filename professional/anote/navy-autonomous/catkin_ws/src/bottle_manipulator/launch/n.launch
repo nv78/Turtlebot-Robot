@@ -1,0 +1,17 @@
+<launch>
+
+<group>
+  <!-- remotely run bringup on Raspberry Pi, added by Eduardo-->
+  <machine name="raspi" address="192.168.43.157" env-loader="/opt/ros/kinetic/env.sh" user="pi" default="true"/>
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_robot.launch"/>
+</group>
+
+  <!-- remotely run bringup on Raspberry Pi, added by Eduardo-->
+  <machine name="pc" address="192.168.43.27" env-loader="/opt/ros/kinetic/env.sh" user="eduardo" default="true"/>
+  <include file="$(find turtlebot3_manipulation_bringup)/launch/turtlebot3_manipulation_bringup.launch"/>
+  <include file="$(find turtlebot3_manipulation_moveit_config)/launch/move_group.launch"/>
+  <include file="$(find turtlebot3_manipulation_slam)/launch/slam.launch"/>  
+  
+
+  
+</launch>

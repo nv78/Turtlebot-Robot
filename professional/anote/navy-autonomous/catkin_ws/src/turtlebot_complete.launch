@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Arguments for different operational modes -->
+  <arg name="mode" default="basic" doc="Operation mode: basic, mapping, semi_autonomous, full_autonomous, test_yolo"/>
+  <arg name="robot_name" default="turtlebot3"/>
+  <arg name="model" default="waffle_pi"/>
+  <arg name="use_manipulation" default="true"/>
+  <arg name="camera" default="true"/>
+  
+  <!-- Set TurtleBot3 model -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+  
+  <!-- Robot State Publisher -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+  
+  <!-- Basic Mode: Manual control and basic functionality -->
+  <group if="$(eval mode == 'basic')">
+    <!-- TurtleBot3 Bringup -->
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_robot.launch">
+      <arg name="model" value="$(arg model)"/>
+    </include>
+    
+    <!-- Camera -->
+    <group if="$(arg camera)">
+      <include file="$(find turtlebot3_bringup)/launch/turtlebot3_rpicamera.launch"/>
+    </group>
+    
+    <!-- Image transport republisher -->
+    <node pkg="image_transport" type="republish" name="republish_compressed" 
+          args="compressed in:=/raspicam_node/image out:=/raspicam_node/image_raw"/>
+    
+    <!-- Static transform publisher -->
+    <node pkg="tf" type="static_transform_publisher" name="camera_transform"
+          args="0 0 0 0 0 0 camera_rgb_optical_frame raspicam 100"/>
+    
+    <!-- SLAM -->
+    <include file="$(find object_tracking)/launch/turtlebot3_slam.launch"/>
+    
+    <!-- Navigation -->
+    <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
+      <arg name="model" value="$(arg model)"/>
+    </include>
+    
+    <!-- Teleoperation -->
+    <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch"/>
+  </group>
+  
+  <!-- Mapping Mode: Autonomous exploration and mapping -->
+  <group if="$(eval mode == 'mapping')">
+    <!-- Include basic functionality -->
+    <include file="$(find turtlebot_complete)/launch/turtlebot_complete.launch">
+      <arg name="mode" value="basic"/>
+      <arg name="model" value="$(arg model)"/>
+      <arg name="camera" value="$(arg camera)"/>
+    </include>
+    
+    <!-- Autonomous exploration -->
+    <include file="$(find explore_lite)/launch/explore.launch"/>
+  </group>
+  
+  <!-- Semi-Autonomous Mode: Manual setup, then autonomous trash picking -->
+  <group if="$(eval mode == 'semi_autonomous')">
+    <!-- Include basic functionality -->
+    <include file="$(find turtlebot_complete)/launch/turtlebot_complete.launch">
+      <arg name="mode" value="basic"/>
+      <arg name="model" value="$(arg model)"/>
+      <arg name="camera" value="$(arg camera)"/>
+    </include>
+    
+    <!-- Manipulation -->
+    <group if="$(arg use_manipulation)">
+      <include file="$(find turtlebot3_manipulation_bringup)/launch/turtlebot3_manipulation_bringup.launch"/>
+      <include file="$(find turtlebot3_manipulation_moveit_config)/launch/move_group.launch"/>
+      <node pkg="bottle_manipulator" type="execute_trajectory.py" name="execute_trajectory"/>
+    </group>
+    
+    <!-- Object detection and tracking -->
+    <include file="$(find object_tracking)/launch/ar_track_alvar.launch"/>
+    <include file="$(find object_tracking)/launch/darknet_ros.launch"/>
+    
+    <!-- Trash detection and handling -->
+    <node pkg="object_tracking" type="detect_trashcan.py" name="detect_trashcan"/>
+    <node pkg="object_tracking" type="find_trashcan.py" name="find_trashcan"/>
+    <node pkg="object_tracking" type="find_trash.py" name="find_trash"/>
+  </group>
+  
+  <!-- Full Autonomous Mode: Complete autonomous operation -->
+  <group if="$(eval mode == 'full_autonomous')">
+    <!-- Include semi-autonomous functionality -->
+    <include file="$(find turtlebot_complete)/launch/turtlebot_complete.launch">
+      <arg name="mode" value="semi_autonomous"/>
+      <arg name="model" value="$(arg model)"/>
+      <arg name="camera" value="$(arg camera)"/>
+      <arg name="use_manipulation" value="$(arg use_manipulation)"/>
+    </include>
+    
+    <!-- Orchestrator for full autonomy -->
+    <include file="$(find patrol)/launch/random_nav.launch"/>
+    <node pkg="orchestrator" type="orchestrator.py" name="orchestrator"/>
+  </group>
+  
+  <!-- YOLO Test Mode: Test object detection only -->
+  <group if="$(eval mode == 'test_yolo')">
+    <!-- Basic robot functionality -->
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_robot.launch">
+      <arg name="model" value="$(arg model)"/>
+    </include>
+    
+    <!-- Camera -->
+    <group if="$(arg camera)">
+      <include file="$(find turtlebot3_bringup)/launch/turtlebot3_rpicamera.launch"/>
+    </group>
+    
+    <!-- Image transport republisher -->
+    <node pkg="image_transport" type="republish" name="republish_compressed" 
+          args="compressed in:=/raspicam_node/image out:=/raspicam_node/image_raw"/>
+    
+    <!-- YOLO detection only -->
+    <include file="$(find object_tracking)/launch/darknet_ros.launch"/>
+  </group>
+  
+  <!-- RViz visualization (optional) -->
+  <arg name="rviz" default="false"/>
+  <group if="$(arg rviz)">
+    <node name="rviz" pkg="rviz" type="rviz" 
+          args="-d $(find object_tracking)/rviz/object_tracking.rviz"/>
+  </group>
+
+</launch> 

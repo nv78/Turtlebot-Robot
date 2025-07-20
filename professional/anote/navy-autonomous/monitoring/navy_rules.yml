@@ -1,0 +1,125 @@
+groups:
+  - name: navy_autonomous_alerts
+    rules:
+      # System Health Alerts
+      - alert: NavyServiceDown
+        expr: up{job="navy-autonomous"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Navy Autonomous service is down"
+          description: "Navy Autonomous service has been down for more than 1 minute"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 90% for more than 2 minutes"
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes"
+
+      # ROS-specific Alerts
+      - alert: ROSMasterDown
+        expr: ros_master_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "ROS Master is down"
+          description: "ROS Master has been unreachable for more than 30 seconds"
+
+      - alert: CriticalROSNodeDown
+        expr: ros_node_up{node=~"/darknet_ros|/move_base|/orchestrator"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical ROS node is down"
+          description: "Critical ROS node {{ $labels.node }} has been down for more than 1 minute"
+
+      # YOLO Performance Alerts
+      - alert: YOLODetectionSlow
+        expr: yolo_detection_duration_seconds > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "YOLO detection is slow"
+          description: "YOLO detection is taking more than 5 seconds consistently"
+
+      - alert: YOLODetectionFailed
+        expr: increase(yolo_detection_failures_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High YOLO detection failure rate"
+          description: "More than 5 YOLO detection failures in the last 5 minutes"
+
+      # Navigation Alerts
+      - alert: NavigationGoalsFailing
+        expr: increase(navigation_goal_failures_total[10m]) > 3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Navigation goals failing frequently"
+          description: "More than 3 navigation goal failures in the last 10 minutes"
+
+      - alert: RobotStuck
+        expr: robot_velocity_linear < 0.01 and navigation_goal_active == 1
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Robot appears to be stuck"
+          description: "Robot has not moved while navigation goal is active for 30 seconds"
+
+      # Storage and Disk Alerts
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is below 10% on root filesystem"
+
+      - alert: LogVolumeGrowing
+        expr: increase(node_filesystem_size_bytes{mountpoint="/var/log"}[1h]) > 100000000  # 100MB
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Log volume growing rapidly"
+          description: "Log volume has grown by more than 100MB in the last hour"
+
+      # Container Health Alerts
+      - alert: ContainerRestarting
+        expr: increase(container_restart_count[10m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container restarting frequently"
+          description: "Container {{ $labels.name }} has restarted in the last 10 minutes"
+
+      - alert: ContainerOOMKilled
+        expr: container_oom_kills_total > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container killed due to OOM"
+          description: "Container {{ $labels.name }} was killed due to out of memory" 

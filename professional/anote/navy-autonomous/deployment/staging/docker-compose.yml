@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  navy-autonomous:
+    image: ghcr.io/your-org/navy-autonomous:${NAVY_IMAGE_VERSION:-latest}
+    container_name: navy-autonomous-staging
+    hostname: navy-autonomous-staging
+    restart: always
+    environment:
+      - NAVY_MODE=${NAVY_MODE:-semi_autonomous}
+      - ROS_MASTER_URI=http://localhost:11311
+      - ROS_IP=172.21.0.10
+      - TURTLEBOT3_MODEL=waffle_pi
+      - ENABLE_HEALTH_MONITORING=true
+      - LOG_LEVEL=INFO
+    ports:
+      - "11311:11311"
+      - "11312:11312"
+    volumes:
+      - "navy_logs_staging:/var/log/navy-autonomous"
+      - "navy_config_staging:/config"
+    networks:
+      navy_staging_network:
+        ipv4_address: 172.21.0.10
+    healthcheck:
+      test: ["/healthcheck.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  # Monitoring and metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: navy-prometheus-staging
+    hostname: navy-prometheus-staging
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - "./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "prometheus_data_staging:/prometheus"
+    networks:
+      navy_staging_network:
+        ipv4_address: 172.21.0.20
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  # Log aggregation
+  fluentd:
+    image: fluent/fluentd:v1.14-debian-1
+    container_name: navy-fluentd-staging
+    hostname: navy-fluentd-staging
+    restart: always
+    ports:
+      - "24224:24224"
+    volumes:
+      - "./monitoring/fluentd.conf:/fluentd/etc/fluent.conf"
+      - "fluentd_logs_staging:/var/log/fluentd"
+    networks:
+      navy_staging_network:
+        ipv4_address: 172.21.0.21
+
+  # Reverse proxy for external access
+  nginx:
+    image: nginx:alpine
+    container_name: navy-nginx-staging
+    hostname: navy-nginx-staging
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./nginx/staging.conf:/etc/nginx/nginx.conf"
+      - "nginx_logs_staging:/var/log/nginx"
+    networks:
+      navy_staging_network:
+        ipv4_address: 172.21.0.30
+    depends_on:
+      - navy-autonomous
+
+networks:
+  navy_staging_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/24
+
+volumes:
+  navy_logs_staging:
+    driver: local
+  navy_config_staging:
+    driver: local
+  prometheus_data_staging:
+    driver: local
+  fluentd_logs_staging:
+    driver: local
+  nginx_logs_staging:
+    driver: local 
