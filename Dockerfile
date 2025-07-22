@@ -1,18 +1,42 @@
 # Simplified Dockerfile to support Trash-Picking Turtlebot
 # Includes ROS Kinetic, required packages, and project repositories
 
+# FROM ubuntu:16.04
+
+# ENV DEBIAN_FRONTEND=noninteractive
+# ENV ROS_DISTRO=kinetic
+
+# # Install dependencies
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     lsb-release curl gnupg2 git wget build-essential \
+#     python-pip python-catkin-tools python-wstool \
+#     ros-$ROS_DISTRO-desktop-full \
+#     ros-$ROS_DISTRO-multirobot-map-merge \
+#     ros-$ROS_DISTRO-explore-lite \
+#     && rm -rf /var/lib/apt/lists/*
+
 FROM ubuntu:16.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ROS_DISTRO=kinetic
 
-# Install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    lsb-release curl gnupg2 git wget build-essential \
-    python-pip python-catkin-tools python-wstool \
-    ros-$ROS_DISTRO-desktop-full \
-    ros-$ROS_DISTRO-multirobot-map-merge \
-    ros-$ROS_DISTRO-explore-lite \
+# Add ROS repository and keys
+RUN apt-get update && apt-get install -y curl gnupg2 lsb-release && \
+    sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \
+    apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key \
+    C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+
+# Install ROS and build tools
+RUN apt-get update && apt-get install -y \
+    ros-kinetic-desktop-full \
+    ros-kinetic-multirobot-map-merge \
+    ros-kinetic-explore-lite \
+    python-catkin-tools \
+    python-wstool \
+    python-pip \
+    git \
+    wget \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup ROS environment
