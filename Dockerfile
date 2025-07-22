@@ -52,15 +52,16 @@ RUN git clone https://github.com/Cornell-Tech-Turtlebot/object_tracking.git && \
     git clone https://github.com/ros-perception/ar_track_alvar.git && \
     git clone https://github.com/Cornell-Tech-Turtlebot/bottle_manipulator.git && \
     git clone https://github.com/Cornell-Tech-Turtlebot/patrol.git && \
-    git clone https://github.com/Cornell-Tech-Turtlebot/orchestrator.git && \
-    git clone https://github.com/ros-planning/moveit.git
+    git clone https://github.com/Cornell-Tech-Turtlebot/orchestrator.git
+    # && \
+    # git clone https://github.com/ros-planning/moveit.git
 
 # Remove existing system moveit (conflicts with source build)
-RUN rm -rf /opt/ros/$ROS_DISTRO/lib/python2.7/dist-packages/moveit_commander*
+# RUN rm -rf /opt/ros/$ROS_DISTRO/lib/python2.7/dist-packages/moveit_commander*
 
 # Modify move_group.py (wait_for_servers = 50.0)
-RUN sed -i 's/self\.wait_for_servers =.*/self.wait_for_servers = 50.0/' \
-    moveit/moveit_commander/src/moveit_commander/move_group.py
+# RUN sed -i 's/self\.wait_for_servers =.*/self.wait_for_servers = 50.0/' \
+#     moveit/moveit_commander/src/moveit_commander/move_group.py
 
 # Build workspace
 WORKDIR /catkin_ws
