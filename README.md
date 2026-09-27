@@ -1,3 +1,7 @@
+> [!NOTE]
+> **Mirror of [anote-ai/Turtlebot-Robot](https://github.com/anote-ai/Turtlebot-Robot).** Built at [Anote](https://github.com/anote-ai), which I founded, together with the contributors in this repository's commit history.
+> The original is the maintained version. Please open issues and PRs there.
+
 # Navy Autonomous TurtleBot Workspace
 
 This repository contains a complete autonomous TurtleBot system that can navigate, map buildings, detect objects using YOLO, and manipulate items autonomously.
